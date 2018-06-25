@@ -1,6 +1,6 @@
 [package]
 name = "crisp-status-local"
-version = "0.0.1"
+version = "1.0.0"
 description = "Crisp Status local probe relay."
 readme = "README.md"
 license = "MPL-2.0"
@@ -23,9 +23,12 @@ doc = false
 log = "0.4"
 clap = { version = "2.31", default-features = false }
 lazy_static = "1.0"
+time = "0.1"
 serde = "1.0"
 serde_derive = "1.0"
 toml = "0.4"
+url = { version = "1.7", default-features = false }
+reqwest = "0.8"
 
 [profile.dev]
 opt-level = 0

@@ -13,11 +13,21 @@ Install Crisp Status Local on a server of yours and configure it with your Crisp
 
 ## What is Crisp Status?
 
-TODO: content
+[Crisp Status](https://crisp.chat/en/status/) is a status page service available on [Crisp](https://crisp.chat/en/).
+
+It lets Crisp users monitor their critical systems using a variety of methods: `push` for applications using a Crisp Status Reporter library, `poll` for public Internet-wide HTTP & TCP services, and `local` for private LAN-wide HTTP & TCP services.
+
+Crisp Status alerts the monitored website operators when a node goes down. If it stays down for too long, website users are also notified via an alert on the Crisp Chatbox, Crisp Helpdesk, as well as access to details on the Crisp Status Page.
+
+Crisp Status Local lets Crisp Status users monitor nodes that are configured in `local` mode (ie. private LAN-wide HTTP & TCP services), aside other monitoring methods that do not require the Crisp Status Local utility.
 
 ## How does it work?
 
-TODO: content
+Crisp Status Local is to be installed on a server in your infrastructure. A maximum of one Crisp Status Local instance can run per Crisp Status Page.
+
+Crisp Status Local dynamically pulls your Crisp Status configuration and checks for `local` mode nodes health. It then reports whether those internal nodes are `healthy`, `sick` or `dead`.
+
+Crisp Status Local is open-source and built in Rust; thus you are free to review, modify its code and compile it yourself. We know that running such a binary in your infrastructure can be sensitive, so we made it open-source.
 
 ## How to use it?
 
@@ -29,6 +39,6 @@ TODO: content
 
 TODO: content
 
-### Run `crisp-status-local`
+### Run
 
 TODO: content

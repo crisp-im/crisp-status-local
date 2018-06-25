@@ -7,3 +7,7 @@
 pub fn server_log_level() -> String {
     "warn".to_string()
 }
+
+pub fn report_endpoint() -> String {
+    "https://report.crisp.watch/v1".to_string()
+}

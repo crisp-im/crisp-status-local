@@ -13,12 +13,18 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
+extern crate time;
 extern crate toml;
+extern crate url;
+extern crate reqwest;
 
 mod config;
+mod probe;
 
+use std::thread;
 use std::ops::Deref;
 use std::str::FromStr;
+use std::time::Duration;
 
 use clap::{App, Arg};
 use log::LevelFilter;
@@ -26,10 +32,14 @@ use log::LevelFilter;
 use config::config::Config;
 use config::logger::ConfigLogger;
 use config::reader::ConfigReader;
+use probe::manager::run as run_probe;
+use probe::report::REPORT_HTTP_CLIENT;
 
 struct AppArgs {
     config: String,
 }
+
+pub static THREAD_NAME_PROBE: &'static str = "crisp-status-local-probe";
 
 lazy_static! {
     static ref APP_ARGS: AppArgs = make_app_args();
@@ -59,6 +69,33 @@ fn ensure_states() {
     // Ensure all statics are valid (a `deref` is enough to lazily initialize them)
     APP_ARGS.deref();
     APP_CONF.deref();
+    REPORT_HTTP_CLIENT.deref();
+}
+
+fn spawn_probe() {
+    debug!("spawn managed thread: probe");
+
+    let worker = thread::Builder::new()
+        .name(THREAD_NAME_PROBE.to_string())
+        .spawn(run_probe);
+
+    // Block on worker thread (join it)
+    let has_error = if let Ok(worker_thread) = worker {
+        worker_thread.join().is_err()
+    } else {
+        true
+    };
+
+    // Worker thread crashed?
+    if has_error == true {
+        error!("managed thread crashed (probe), setting it up again");
+
+        // Prevents thread start loop floods
+        // Notice: 5 seconds here to prevent network floods
+        thread::sleep(Duration::from_secs(5));
+
+        spawn_probe();
+    }
 }
 
 fn main() {
@@ -72,7 +109,8 @@ fn main() {
     // Ensure all states are bound
     ensure_states();
 
-    // TODO
+    // Spawn probe (foreground thread)
+    spawn_probe();
 
     error!("could not start");
 }
