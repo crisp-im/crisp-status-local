@@ -5,9 +5,11 @@ crisp-status-local
 
 **Crisp Status Local is used to monitor internal hosts and report their status to Crisp Status.**
 
-TODO: desc
+Crisp Status Local is a daemon that you can use to report internal service health to your Crisp Status-powered status page. It is designed to be used behind a firewall, and to monitor hosts bound to your local loop or LAN network (eg. a MySQL server running on a LAN IP address).
 
-**👉 See a live demo of Crisp Status on [Enrich Status Page](https://status.enrichdata.com).**
+Crisp Status Local will automatically monitor all nodes that you configured in Crisp in `local` mode. The `local` mode is similar to `poll` mode, but is used specifically for `crisp-status-local` monitoring.
+
+**👉 See a live demo of Crisp Status on [Enrich Status Page](https://status.enrichdata.com/).**
 
 ## What is Crisp Status?
 
