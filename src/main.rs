@@ -16,6 +16,7 @@ extern crate serde;
 extern crate time;
 extern crate toml;
 extern crate url;
+extern crate openssl_probe;
 extern crate reqwest;
 
 mod config;
@@ -99,6 +100,9 @@ fn spawn_probe() {
 }
 
 fn main() {
+    // Ensure OpenSSL root chain is found on current environment
+    openssl_probe::init_ssl_cert_env_vars();
+
     // Initialize shared logger
     let _logger = ConfigLogger::init(LevelFilter::from_str(&APP_CONF.server.log_level).expect(
         "invalid log level",
