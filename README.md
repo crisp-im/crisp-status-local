@@ -145,4 +145,4 @@ If you find a vulnerability in Crisp Status Local, you are more than welcome to 
 
 **:warning: You must encrypt your email using [@crisp-im](https://github.com/crisp-im) GPG public key: [:key:8AD28DC5.asc](https://docs.crisp.chat/assets/keys/8AD28DC5.asc).**
 
-**:gift: Based on the severity of the vulnerability, Crisp IM SARL may offer a $100 (US) bounty to whomever reported it.**
+**:gift: Based on the severity of the vulnerability, Crisp (ie. us, the company) may offer a $100 (US) bounty to whomever reported it.**
