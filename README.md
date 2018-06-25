@@ -37,18 +37,18 @@ Crisp Status Local dynamically pulls your Crisp Status configuration and checks 
 
 #### A. Install from Docker Hub (⭐️ recommended)
 
-You might find it convenient to run Crisp Status Local via Docker. You can find the pre-built Crisp Status Local image on Docker Hub as [crisp-im/crisp-status-local](https://hub.docker.com/r/crisp-im/crisp-status-local/).
+You might find it convenient to run Crisp Status Local via Docker. You can find the pre-built Crisp Status Local image on Docker Hub as [crispim/crisp-status-local](https://hub.docker.com/r/crispim/crisp-status-local/).
 
-First, pull the `crisp-im/crisp-status-local` image:
+First, pull the `crispim/crisp-status-local` image:
 
 ```bash
-docker pull crisp-im/crisp-status-local:v1.0.0
+docker pull crispim/crisp-status-local:v1.0.0
 ```
 
 Then, seed it a configuration file and run it (replace `/path/to/your/crisp-status-local/config.cfg` with the path to your configuration file):
 
 ```bash
-docker run -v /path/to/your/crisp-status-local/config.cfg:/etc/crisp-status-local.cfg crisp-im/crisp-status-local:v1.0.0
+docker run -v /path/to/your/crisp-status-local/config.cfg:/etc/crisp-status-local.cfg crispim/crisp-status-local:v1.0.0
 ```
 
 In the configuration file, ensure that:
