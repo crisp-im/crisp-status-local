@@ -29,7 +29,7 @@ Crisp Status Local is to be installed on a server in your infrastructure. A maxi
 
 Crisp Status Local dynamically pulls your Crisp Status configuration and checks for `local` mode nodes health. It then reports whether those internal nodes are `healthy`, `sick` or `dead`.
 
-Crisp Status Local is open-source and built in Rust; thus you are free to review, modify its code and compile it yourself. We know that running such a binary in your infrastructure can be sensitive, so we made it open-source.
+**👉 Crisp Status Local is open-source and built in Rust; thus you are free to review, modify its code and compile it yourself. We know that running such a binary in your infrastructure can be sensitive, that's why we made it open-source.**
 
 ## How to use it?
 
