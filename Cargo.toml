@@ -1,0 +1,39 @@
+[package]
+name = "crisp-status-local"
+version = "0.0.1"
+description = "Crisp Status local probe relay."
+readme = "README.md"
+license = "MPL-2.0"
+homepage = "https://github.com/crisp-im/crisp-status-local"
+repository = "https://github.com/crisp-im/crisp-status-local.git"
+keywords = ["crisp", "crisp-status", "infrastructure", "status", "monitor"]
+categories = ["web-programming"]
+authors = ["Valerian Saliou <valerian@crisp.chat>"]
+
+[badges]
+travis-ci = { repository = "crisp-im/crisp-status-local", branch = "master" }
+coveralls = { repository = "crisp-im/crisp-status-local", branch = "master", service = "github" }
+
+[[bin]]
+name = "crisp-status-local"
+path = "src/main.rs"
+doc = false
+
+[dependencies]
+log = "0.4"
+clap = { version = "2.31", default-features = false }
+lazy_static = "1.0"
+serde = "1.0"
+serde_derive = "1.0"
+toml = "0.4"
+
+[profile.dev]
+opt-level = 0
+debug = true
+debug-assertions = true
+
+[profile.release]
+opt-level = "s"
+lto = true
+debug = false
+debug-assertions = false
