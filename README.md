@@ -1,4 +1,4 @@
-crisp-status-local
+Crisp Status Local
 ==================
 
 [![Build Status](https://travis-ci.org/crisp-im/crisp-status-local.svg?branch=master)](https://travis-ci.org/crisp-im/crisp-status-local) [![Dependency Status](https://deps.rs/repo/github/crisp-im/crisp-status-local/status.svg)](https://deps.rs/repo/github/crisp-im/crisp-status-local)
@@ -137,4 +137,12 @@ If you installed Crisp Status Local from packages (which is recommended), you ca
 
 Otherwise, Crisp Status Local can be run as such:
 
-`./vigil -c /path/to/config.cfg`
+`./crisp-status-local -c /path/to/config.cfg`
+
+## :fire: Report A Vulnerability
+
+If you find a vulnerability in Crisp Status Local, you are more than welcome to report it directly to [@valeriansaliou](https://github.com/valeriansaliou) by sending an encrypted email to [valerian@valeriansaliou.name](mailto:valerian@valeriansaliou.name). Do not report vulnerabilities in public GitHub issues, as they may be exploited by malicious people to target production servers running an unpatched Crisp Status Local server.
+
+**:warning: You must encrypt your email using [@valeriansaliou](https://github.com/valeriansaliou) GPG public key: [:key:valeriansaliou.gpg.pub.asc](https://valeriansaliou.name/files/keys/valeriansaliou.gpg.pub.asc).**
+
+**:gift: Based on the severity of the vulnerability, Crisp IM SARL may offer a $100 (US) bounty to whomever reported it.**
