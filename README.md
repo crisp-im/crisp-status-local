@@ -141,8 +141,8 @@ Otherwise, Crisp Status Local can be run as such:
 
 ## :fire: Report A Vulnerability
 
-If you find a vulnerability in Crisp Status Local, you are more than welcome to report it directly to [@valeriansaliou](https://github.com/valeriansaliou) by sending an encrypted email to [valerian@valeriansaliou.name](mailto:valerian@valeriansaliou.name). Do not report vulnerabilities in public GitHub issues, as they may be exploited by malicious people to target production servers running an unpatched Crisp Status Local server.
+If you find a vulnerability in Crisp Status Local, you are more than welcome to report it directly to [@crisp-im](https://github.com/crisp-im) by sending an encrypted email to [security@crisp.chat](mailto:security@crisp.chat). Do not report vulnerabilities in public GitHub issues, as they may be exploited by malicious people to target production servers running an unpatched Crisp Status Local server.
 
-**:warning: You must encrypt your email using [@valeriansaliou](https://github.com/valeriansaliou) GPG public key: [:key:valeriansaliou.gpg.pub.asc](https://valeriansaliou.name/files/keys/valeriansaliou.gpg.pub.asc).**
+**:warning: You must encrypt your email using [@crisp-im](https://github.com/crisp-im) GPG public key: [:key:8AD28DC5.asc](https://docs.crisp.chat/assets/keys/8AD28DC5.asc).**
 
 **:gift: Based on the severity of the vulnerability, Crisp IM SARL may offer a $100 (US) bounty to whomever reported it.**
