@@ -35,7 +35,7 @@ Crisp Status Local dynamically pulls your Crisp Status configuration and checks 
 
 ### Installation
 
-#### A. [Recommended] Install from packages
+#### A. Install from packages (⭐️ recommended)
 
 Crisp Status Local provides [pre-built packages](https://packagecloud.io/crisp-im/crisp-status-local) for Debian-based systems (Debian, Ubuntu, etc.).
 
