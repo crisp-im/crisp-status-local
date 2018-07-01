@@ -4,10 +4,16 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
+use std::thread;
+use std::time::Duration;
+
 use reqwest::StatusCode;
 
 use super::report::{REPORT_HTTP_CLIENT, generate_url as report_generate_url};
 use super::replica::ReplicaURL;
+
+const RETRY_ACQUIRE_TIMES: u8 = 2;
+const RETRY_ACQUIRE_AFTER_SECONDS: u64 = 5;
 
 #[derive(Deserialize)]
 pub struct MapFromResponse {
@@ -44,6 +50,7 @@ pub struct MapMetricsPush {
 
 #[derive(Deserialize)]
 pub struct MapMetricsLocal {
+    pub retry: u8,
     pub delay_dead: u64,
     pub delay_sick: u64,
 }
@@ -81,11 +88,44 @@ pub struct MapServiceNodeHTTPBody {
 #[derive(Debug)]
 pub enum MapError {
     FailedRequest,
+    NotAuthorized,
     InvalidStatus,
     InvalidData,
+    ExhaustedAttempts,
 }
 
 pub fn acquire(map: &mut Map) -> Result<(), MapError> {
+    // Attempt to acquire (first attempt)
+    acquire_attempt(map, 0)
+}
+
+fn acquire_attempt(map: &mut Map, attempt: u8) -> Result<(), MapError> {
+    info!("running acquire attempt #{}", attempt);
+
+    match acquire_request(map) {
+        Ok(_) => Ok(()),
+        Err(MapError::NotAuthorized) => Err(MapError::NotAuthorized),
+        Err(_) => {
+            let next_attempt = attempt + 1;
+
+            if next_attempt > RETRY_ACQUIRE_TIMES {
+                Err(MapError::ExhaustedAttempts)
+            } else {
+                warn!(
+                    "acquire attempt #{} failed, will retry after delay",
+                    attempt
+                );
+
+                // Retry after delay
+                thread::sleep(Duration::from_secs(RETRY_ACQUIRE_AFTER_SECONDS));
+
+                acquire_attempt(map, next_attempt)
+            }
+        }
+    }
+}
+
+fn acquire_request(map: &mut Map) -> Result<(), MapError> {
     // Generate probe path
     let mut probe_path = String::from("probes/local");
 
@@ -139,9 +179,11 @@ pub fn acquire(map: &mut Map) -> Result<(), MapError> {
                     // Invalid token?
                     if status == StatusCode::Unauthorized {
                         error!("[important] your reporter token is invalid, please update it");
-                    }
 
-                    Err(MapError::InvalidStatus)
+                        Err(MapError::NotAuthorized)
+                    } else {
+                        Err(MapError::InvalidStatus)
+                    }
                 }
             }
         }

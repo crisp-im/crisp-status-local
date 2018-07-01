@@ -4,28 +4,23 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
-use reqwest::{Client, StatusCode, RedirectPolicy};
+use reqwest::{Client, RedirectPolicy};
 use reqwest::header::{Headers, UserAgent};
 use time;
 
+use std::thread;
 use std::time::SystemTime;
 use std::time::Duration;
 use std::net::{TcpStream, ToSocketAddrs};
 
-use super::report::{REPORT_HTTP_CLIENT, generate_url as report_generate_url};
+use super::report::status as report_status;
 use super::map::{MapMetrics, MapService, MapServiceNodeHTTP};
 use super::status::Status;
 use super::replica::ReplicaURL;
 
 const NODE_HTTP_HEALTHY_ABOVE: u16 = 200;
 const NODE_HTTP_HEALTHY_BELOW: u16 = 400;
-
-#[derive(Serialize)]
-struct ReportPayload<'a> {
-    replica_id: &'a str,
-    health: &'a str,
-    interval: u64,
-}
+const RETRY_REPLICA_AFTER_MILLISECONDS: u64 = 200;
 
 pub fn dispatch(services: &Vec<MapService>, metrics: &Option<MapMetrics>, interval: u64) {
     debug!("will dispatch polls");
@@ -43,42 +38,9 @@ pub fn dispatch(services: &Vec<MapService>, metrics: &Option<MapMetrics>, interv
 
                     debug!("got replica status upon poll: {:?}", replica_status);
 
-                    // Generate report path
-                    let report_path = format!("report/{}/{}", &service.id, &node.id);
-
-                    debug!("generated report url: {}", &report_path);
-
-                    // Acquire report response
-                    let response = REPORT_HTTP_CLIENT
-                        .post(&report_generate_url(&report_path))
-                        .json(&ReportPayload {
-                            replica_id: replica.get_raw(),
-                            health: replica_status.as_str(),
-                            interval: interval,
-                        })
-                        .send();
-
-                    match response {
-                        Ok(mut response_inner) => {
-                            let status = response_inner.status();
-
-                            if status == StatusCode::Ok {
-                                debug!("reported to probe path: {}", report_path);
-                            } else {
-                                debug!(
-                                    "could not report to probe path: {} (got status: {})",
-                                    report_path,
-                                    status
-                                );
-                            }
-                        }
-                        Err(err) => {
-                            warn!(
-                                "failed reporting to probe path: {} because: {}",
-                                report_path,
-                                err
-                            );
-                        }
+                    match report_status(service, node, replica, &replica_status, interval) {
+                        Ok(_) => info!("reported replica status: {:?}", replica_status),
+                        Err(_) => warn!("failed reporting replica status: {:?}", replica_status),
                     }
                 }
             }
@@ -95,6 +57,75 @@ pub fn proceed_replica(
     http: &Option<MapServiceNodeHTTP>,
     metrics: &Option<MapMetrics>,
 ) -> Status {
+    // Acquire number of times to retry
+    let retry_times = if let &Some(ref metrics_inner) = metrics {
+        metrics_inner.local.retry
+    } else {
+        2
+    };
+
+    // Attempt to acquire (first attempt)
+    proceed_replica_attempt(service_id, node_id, replica, http, metrics, retry_times, 0)
+}
+
+fn proceed_replica_attempt(
+    service_id: &str,
+    node_id: &str,
+    replica: &ReplicaURL,
+    http: &Option<MapServiceNodeHTTP>,
+    metrics: &Option<MapMetrics>,
+    retry_times: u8,
+    attempt: u8,
+) -> Status {
+    info!(
+        "running replica scan attempt #{} on #{}:#{}:[{:?}]",
+        attempt,
+        service_id,
+        node_id,
+        replica
+    );
+
+    match proceed_replica_request(service_id, node_id, replica, http, metrics) {
+        Status::Healthy => Status::Healthy,
+        Status::Sick => Status::Sick,
+        Status::Dead => {
+            let next_attempt = attempt + 1;
+
+            if next_attempt > retry_times {
+                Status::Dead
+            } else {
+                warn!(
+                    "replica scan attempt #{} failed on #{}:#{}:[{:?}], will retry after delay",
+                    attempt,
+                    service_id,
+                    node_id,
+                    replica
+                );
+
+                // Retry after delay
+                thread::sleep(Duration::from_millis(RETRY_REPLICA_AFTER_MILLISECONDS));
+
+                proceed_replica_attempt(
+                    service_id,
+                    node_id,
+                    replica,
+                    http,
+                    metrics,
+                    retry_times,
+                    next_attempt,
+                )
+            }
+        }
+    }
+}
+
+fn proceed_replica_request(
+    service_id: &str,
+    node_id: &str,
+    replica: &ReplicaURL,
+    http: &Option<MapServiceNodeHTTP>,
+    metrics: &Option<MapMetrics>,
+) -> Status {
     debug!(
         "scanning replica: #{}:#{}:[{:?}]",
         service_id,
@@ -105,9 +136,9 @@ pub fn proceed_replica(
     let start_time = SystemTime::now();
 
     let is_up = match replica {
-        &ReplicaURL::TCP(_, ref host, port) => proceed_replica_tcp(host, port, metrics),
-        &ReplicaURL::HTTP(_, ref url) => proceed_replica_http(url, http, metrics),
-        &ReplicaURL::HTTPS(_, ref url) => proceed_replica_http(url, http, metrics),
+        &ReplicaURL::TCP(_, ref host, port) => proceed_replica_request_tcp(host, port, metrics),
+        &ReplicaURL::HTTP(_, ref url) => proceed_replica_request_http(url, http, metrics),
+        &ReplicaURL::HTTPS(_, ref url) => proceed_replica_request_http(url, http, metrics),
     };
 
     if is_up == true {
@@ -126,7 +157,7 @@ pub fn proceed_replica(
     }
 }
 
-fn proceed_replica_tcp(host: &str, port: u16, metrics: &Option<MapMetrics>) -> bool {
+fn proceed_replica_request_tcp(host: &str, port: u16, metrics: &Option<MapMetrics>) -> bool {
     let address_results = (host, port).to_socket_addrs();
 
     if let Ok(mut address) = address_results {
@@ -146,7 +177,7 @@ fn proceed_replica_tcp(host: &str, port: u16, metrics: &Option<MapMetrics>) -> b
     false
 }
 
-fn proceed_replica_http(
+fn proceed_replica_request_http(
     url: &str,
     http: &Option<MapServiceNodeHTTP>,
     metrics: &Option<MapMetrics>,
