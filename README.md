@@ -36,7 +36,7 @@ Crisp Status Local dynamically pulls your Crisp Status configuration and checks 
 You can easily add local nodes to be monitored on your Crisp dashboard, as follows:
 
 <p align="center">
-  <img height="320" src="https://crisp-im.github.io/crisp-status-local/images/setup.gif" alt="How to add monitored nodes">
+  <img height="300" src="https://crisp-im.github.io/crisp-status-local/images/setup.gif" alt="How to add monitored nodes">
 </p>
 
 ## How to use it?
