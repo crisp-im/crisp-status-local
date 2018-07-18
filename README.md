@@ -31,6 +31,12 @@ Crisp Status Local dynamically pulls your Crisp Status configuration and checks 
 
 **👉 Crisp Status Local is open-source and built in Rust; thus you are free to review, modify its code and compile it yourself. We know that running such a binary in your infrastructure can be sensitive, that's why we made it open-source.**
 
+## How to add monitored nodes?
+
+You can easily add local nodes to be monitored on your Crisp dashboard, as follows:
+
+![How to add monitored nodes](https://crisp-im.github.io/crisp-status-local/images/setup.gif)
+
 ## How to use it?
 
 ### Installation
