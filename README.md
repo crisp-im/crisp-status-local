@@ -15,7 +15,7 @@ Copyright 2018 Crisp IM SARL. See LICENSE for copying information.
 
 ## What is Crisp Status?
 
-[Crisp Status](https://crisp.chat/en/status/) is a status page service available on [Crisp](https://crisp.chat/en/). See a live demo of Crisp Status on [Enrich Status Page](https://status.enrichdata.com/) (Enrich is a service that uses Crisp).
+[Crisp Status](https://crisp.chat/en/status/) is a status page service available on [Crisp](https://crisp.chat/en/). See a live demo of Crisp Status on [Enrich Status Page](https://status.enrich.email/) (Enrich is a service that uses Crisp).
 
 It lets Crisp users monitor their critical systems using a variety of methods: `push` for applications using a Crisp Status Reporter library, `poll` for public Internet-wide HTTP & TCP services, and `local` for private LAN-wide HTTP & TCP services.
 
