@@ -20,7 +20,7 @@ We consider here the packaging flow of `crisp-status-local` version `1.0.0` for 
 4. **How to package built binary and release it on GitHub:**
     1. `mkdir crisp-status-local`
     2. `mv target/x86_64-unknown-linux-musl/release/crisp-status-local crisp-status-local/`
-    4. `cp -r config.cfg crisp-status-local/`
+    4. `cp config.cfg crisp-status-local/`
     5. `tar -czvf v1.0.0-x86_64.tar.gz crisp-status-local`
     6. `rm -r crisp-status-local/`
     7. Publish the archive on the [releases](https://github.com/crisp-im/crisp-status-local/releases) page on GitHub
