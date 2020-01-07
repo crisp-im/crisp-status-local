@@ -1,0 +1,13 @@
+[Unit]
+Description=Crisp Status Local
+After=network.target
+
+[Service]
+Type=simple
+User=crisp-status-local
+Group=crisp-status-local
+ExecStart=/bin/crisp-status-local -c /etc/crisp-status-local.cfg
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
