@@ -181,16 +181,7 @@ fn proceed_replica_request_http(
     http: &Option<MapServiceNodeHTTP>,
     metrics: &Option<MapMetrics>,
 ) -> bool {
-    let duration_since_epoch = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap_or(Duration::new(0, 0));
-
-    let (url_bang, dead_timeout) = (
-        format!("{}?{}", url, duration_since_epoch.as_secs()),
-        acquire_dead_timeout(metrics),
-    );
-
-    debug!("prober poll will fire for http target: {}", &url_bang);
+    debug!("prober poll will fire for http target: {}", &url);
 
     // Unpack HTTP body match
     let http_body_healthy_match = http.as_ref().and_then(|ref http_inner| {
@@ -205,10 +196,13 @@ fn proceed_replica_request_http(
         None
     });
 
+    // Unpack dead timeout
+    let dead_timeout = acquire_dead_timeout(metrics);
+
     // Acquire replica response
     let mut response_body = Vec::new();
 
-    let response = Request::new(&Uri::from_str(&url_bang).expect("invalid replica request uri"))
+    let response = Request::new(&Uri::from_str(&url).expect("invalid replica request uri"))
         .connect_timeout(Some(dead_timeout))
         .read_timeout(Some(dead_timeout))
         .write_timeout(Some(dead_timeout))
@@ -226,7 +220,7 @@ fn proceed_replica_request_http(
 
         debug!(
             "prober poll result received for url: {} with status: {}",
-            &url_bang, status_code
+            &url, status_code
         );
 
         // Unpack HTTP status codes
@@ -252,7 +246,7 @@ fn proceed_replica_request_http(
                 if !response_body.is_empty() {
                     debug!(
                         "checking prober poll result response text for url: {} for any match",
-                        &url_bang
+                        &url
                     );
 
                     // Check transfer encoding of response body
@@ -285,7 +279,7 @@ fn proceed_replica_request_http(
                         return false;
                     }
                 } else {
-                    debug!("could not unpack response text for url: {}", &url_bang);
+                    debug!("could not unpack response text for url: {}", &url);
 
                     // Consider as DOWN (the response text could not be checked)
                     return false;
@@ -295,7 +289,7 @@ fn proceed_replica_request_http(
             return true;
         }
     } else {
-        debug!("prober poll result was not received for url: {}", &url_bang);
+        debug!("prober poll result was not received for url: {}", &url);
     }
 
     // Consider as DOWN.
