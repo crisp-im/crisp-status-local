@@ -12,9 +12,12 @@ extern crate clap;
 extern crate lazy_static;
 #[macro_use]
 extern crate serde_derive;
+extern crate base64;
+extern crate http_req;
+extern crate memmem;
 extern crate openssl_probe;
-extern crate reqwest;
 extern crate serde;
+extern crate serde_json;
 extern crate toml;
 extern crate url;
 
@@ -33,7 +36,6 @@ use config::config::Config;
 use config::logger::ConfigLogger;
 use config::reader::ConfigReader;
 use probe::manager::run as run_probe;
-use probe::report::REPORT_HTTP_CLIENT;
 
 struct AppArgs {
     config: String,
@@ -69,11 +71,7 @@ fn make_app_args() -> AppArgs {
 
 fn ensure_states() {
     // Ensure all statics are valid (a `deref` is enough to lazily initialize them)
-    let (_, _, _) = (
-        APP_ARGS.deref(),
-        APP_CONF.deref(),
-        REPORT_HTTP_CLIENT.deref(),
-    );
+    let (_, _) = (APP_ARGS.deref(), APP_CONF.deref());
 }
 
 fn spawn_probe() {

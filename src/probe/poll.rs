@@ -4,10 +4,15 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
-use reqwest::header::{Headers, UserAgent};
-use reqwest::{Client, RedirectPolicy};
+use http_req::{
+    request::{Method, Request},
+    response::Headers,
+    uri::Uri,
+};
+use memmem::{Searcher, TwoWaySearcher};
 
 use std::net::{TcpStream, ToSocketAddrs};
+use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 use std::time::SystemTime;
@@ -20,6 +25,11 @@ use super::status::Status;
 const NODE_HTTP_HEALTHY_ABOVE: u16 = 200;
 const NODE_HTTP_HEALTHY_BELOW: u16 = 400;
 const RETRY_REPLICA_AFTER_MILLISECONDS: u64 = 200;
+
+lazy_static! {
+    static ref POLL_HTTP_HEADER_USERAGENT: String =
+        format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+}
 
 pub fn dispatch(services: &Vec<MapService>, metrics: &Option<MapMetrics>, interval: u64) {
     debug!("will dispatch polls");
@@ -174,7 +184,10 @@ fn proceed_replica_request_http(
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap_or(Duration::new(0, 0));
 
-    let url_bang = format!("{}?{}", url, duration_since_epoch.as_secs());
+    let (url_bang, dead_timeout) = (
+        format!("{}?{}", url, duration_since_epoch.as_secs()),
+        acquire_dead_timeout(metrics),
+    );
 
     debug!("prober poll will fire for http target: {}", &url_bang);
 
@@ -191,25 +204,24 @@ fn proceed_replica_request_http(
         None
     });
 
-    // Build HTTP client
-    let http_client = Client::builder()
-        .timeout(acquire_dead_timeout(metrics))
-        .gzip(false)
-        .redirect(RedirectPolicy::none())
-        .enable_hostname_verification()
-        .default_headers(make_http_client_headers())
-        .build()
-        .unwrap();
+    // Acquire replica response
+    let mut response_body = Vec::new();
 
-    // Proceed request (with appropriate method)
-    let response = if http_body_healthy_match.is_some() == true {
-        http_client.get(&url_bang).send()
-    } else {
-        http_client.head(&url_bang).send()
-    };
+    let response = Request::new(&Uri::from_str(&url_bang).expect("invalid replica request uri"))
+        .connect_timeout(Some(dead_timeout))
+        .read_timeout(Some(dead_timeout))
+        .write_timeout(Some(dead_timeout))
+        .method(if http_body_healthy_match.is_some() == true {
+            Method::GET
+        } else {
+            Method::HEAD
+        })
+        .headers(make_replica_request_headers())
+        .send(&mut response_body);
 
-    if let Ok(mut response_inner) = response {
-        let status_code = response_inner.status().as_u16();
+    // Handle response
+    if let Ok(response) = response {
+        let status_code = u16::from(response.status_code());
 
         debug!(
             "prober poll result received for url: {} with status: {}",
@@ -236,14 +248,17 @@ fn proceed_replica_request_http(
         if status_code >= http_healthy_above && status_code < http_healthy_below {
             // Check response body for match? (if configured)
             if let Some(ref http_body_healthy_match_inner) = http_body_healthy_match {
-                if let Ok(text) = response_inner.text() {
+                if !response_body.is_empty() {
                     debug!(
-                        "checking prober poll result response text for url: {} for any match: {}",
-                        &url_bang, &text
+                        "checking prober poll result response text for url: {} for any match",
+                        &url_bang
                     );
 
                     // Doesnt match? Consider as DOWN.
-                    if text.contains(http_body_healthy_match_inner) == false {
+                    let text_search = TwoWaySearcher::new(http_body_healthy_match_inner.as_bytes())
+                        .search_in(&response_body);
+
+                    if text_search.is_none() {
                         return false;
                     }
                 } else {
@@ -272,14 +287,10 @@ fn acquire_dead_timeout(metrics: &Option<MapMetrics>) -> Duration {
     })
 }
 
-fn make_http_client_headers() -> Headers {
+fn make_replica_request_headers() -> Headers {
     let mut headers = Headers::new();
 
-    headers.set(UserAgent::new(format!(
-        "{}/{}",
-        env!("CARGO_PKG_NAME"),
-        env!("CARGO_PKG_VERSION")
-    )));
+    headers.insert("User-Agent", &*POLL_HTTP_HEADER_USERAGENT);
 
     headers
 }

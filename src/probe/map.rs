@@ -4,13 +4,21 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
+use http_req::{
+    request::{Method, Request},
+    uri::Uri,
+};
+use serde_json;
+
+use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 
-use reqwest::StatusCode;
-
 use super::replica::ReplicaURL;
-use super::report::{generate_url as report_generate_url, REPORT_HTTP_CLIENT};
+use super::report::{
+    generate_url as report_generate_url,
+    make_status_request_headers as report_make_status_request_headers, REPORT_HTTP_CLIENT_TIMEOUT,
+};
 
 const RETRY_ACQUIRE_TIMES: u8 = 2;
 const RETRY_ACQUIRE_AFTER_SECONDS: u64 = 5;
@@ -136,20 +144,33 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
 
     debug!("generated probes url: {}", &probe_path);
 
-    // Acquire items
-    match REPORT_HTTP_CLIENT
-        .get(&report_generate_url(&probe_path))
-        .send()
-    {
-        Ok(mut response_inner) => {
-            let status = response_inner.status();
+    // Generate request URI
+    let request_uri =
+        Uri::from_str(&report_generate_url(&probe_path)).expect("invalid probe request uri");
 
-            debug!("acquired probe map with status: {}", status.as_u16());
+    // Acquire probe response
+    let mut response_body = Vec::new();
+
+    let response = Request::new(&request_uri)
+        .connect_timeout(Some(REPORT_HTTP_CLIENT_TIMEOUT))
+        .read_timeout(Some(REPORT_HTTP_CLIENT_TIMEOUT))
+        .write_timeout(Some(REPORT_HTTP_CLIENT_TIMEOUT))
+        .method(Method::GET)
+        .headers(report_make_status_request_headers(None))
+        .send(&mut response_body);
+
+    // Acquire items
+    match response {
+        Ok(response) => {
+            let status_code = u16::from(response.status_code());
+
+            debug!("acquired probe map with status: {}", status_code);
 
             // Parse JSON result
-            match status {
-                StatusCode::Ok => {
-                    match response_inner.json::<MapFromResponse>() {
+            match status_code {
+                200 => {
+                    // Status is: 'OK'
+                    match serde_json::from_slice::<MapFromResponse>(&response_body) {
                         Ok(response_json) => {
                             info!("acquired probe map with changes");
 
@@ -166,7 +187,8 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
                         }
                     }
                 }
-                StatusCode::NotModified => {
+                304 => {
+                    // Status is: 'Not Modified'
                     debug!("acquired probe map with no changes");
 
                     Ok(())
@@ -174,11 +196,12 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
                 _ => {
                     warn!(
                         "got invalid status code for probe map acquire: {}",
-                        status.as_u16()
+                        status_code
                     );
 
                     // Invalid token?
-                    if status == StatusCode::Unauthorized {
+                    if status_code == 401 {
+                        // Status is: 'Unauthorized'
                         error!("[important] your reporter token is invalid, please update it");
 
                         Err(MapError::NotAuthorized)
