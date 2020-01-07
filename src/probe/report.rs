@@ -100,10 +100,10 @@ fn status_request(
     status: &Status,
     interval: u64,
 ) -> Result<(), ()> {
-    // Generate report path
-    let report_path = format!("report/{}/{}", &service.id, &node.id);
+    // Generate report URL
+    let report_url = generate_url(&format!("report/{}/{}", &service.id, &node.id));
 
-    debug!("generated report url: {}", &report_path);
+    debug!("generated report url: {}", &report_url);
 
     // Generate report payload
     let payload = ReportPayload {
@@ -117,8 +117,7 @@ fn status_request(
     let payload_json = serde_json::to_vec(&payload).expect("invalid status request payload");
 
     // Generate request URI
-    let request_uri =
-        Uri::from_str(&generate_url(&report_path)).expect("invalid status request uri");
+    let request_uri = Uri::from_str(&report_url).expect("invalid status request uri");
 
     // Acquire report response
     let mut response_sink = io::sink();
@@ -140,13 +139,13 @@ fn status_request(
             let status_code = response.status_code();
 
             if status_code.is_success() {
-                debug!("reported to probe path: {}", report_path);
+                debug!("reported to probe url: {}", report_url);
 
                 Ok(())
             } else {
                 debug!(
-                    "could not report to probe path: {} (got status code: {})",
-                    report_path, status_code
+                    "could not report to probe url: {} (got status code: {})",
+                    report_url, status_code
                 );
 
                 Err(())
@@ -154,8 +153,8 @@ fn status_request(
         }
         Err(err) => {
             warn!(
-                "failed reporting to probe path: {} because: {}",
-                report_path, err
+                "failed reporting to probe url: {} because: {}",
+                report_url, err
             );
 
             Err(())
