@@ -65,7 +65,13 @@ In the configuration file, ensure that:
 
 * `report.token` is set to your Crisp Status Reporter token (you can get it on your Crisp dashboard)
 
-#### B. Install from Cargo
+#### B. Install from binary
+
+A pre-built binary of Crisp Status Local is shared in the releases on GitHub. You can simply download the latest binary version from the [releases page](https://github.com/crisp-im/crisp-status-local/releases), and run it on your server.
+
+You will still need to provide the binary with the configuration file, so make sure you have a Crisp Status Local `config.cfg` file ready somewhere.
+
+#### C. Install from Cargo
 
 If you prefer managing `crisp-status-local` via Rust's Cargo, install it directly via `cargo install`:
 
@@ -75,7 +81,7 @@ cargo install crisp-status-local
 
 Ensure that your `$PATH` is properly configured to source the Crates binaries, and then run Crisp Status Local using the `crisp-status-local` command.
 
-#### C. Build from source
+#### D. Build from source
 
 The last option is to pull the source code from Git and compile Crisp Status Local via `cargo`:
 
