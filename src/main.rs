@@ -22,6 +22,7 @@ extern crate url;
 
 mod config;
 mod probe;
+mod utilities;
 
 use std::ops::Deref;
 use std::str::FromStr;
