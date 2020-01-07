@@ -71,6 +71,8 @@ A pre-built binary of Crisp Status Local is shared in the releases on GitHub. Yo
 
 You will still need to provide the binary with the configuration file, so make sure you have a Crisp Status Local `config.cfg` file ready somewhere.
 
+_The binary provided is statically-linked, which means that it will be able to run on any Linux-based server. Still, it will not work on MacOS or Windows machines._
+
 #### C. Install from Cargo
 
 If you prefer managing `crisp-status-local` via Rust's Cargo, install it directly via `cargo install`:
