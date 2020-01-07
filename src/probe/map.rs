@@ -16,8 +16,8 @@ use std::time::Duration;
 
 use super::replica::ReplicaURL;
 use super::report::{
-    generate_url as report_generate_url,
-    make_status_request_headers as report_make_status_request_headers, REPORT_HTTP_CLIENT_TIMEOUT,
+    generate_url as report_generate_url, REPORT_HTTP_CLIENT_TIMEOUT,
+    REPORT_HTTP_HEADER_AUTHORIZATION, REPORT_HTTP_HEADER_USERAGENT,
 };
 
 const RETRY_ACQUIRE_TIMES: u8 = 2;
@@ -142,11 +142,12 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
         probe_path.push_str(&date.to_string());
     }
 
-    debug!("generated probes url: {}", &probe_path);
+    let probe_url = report_generate_url(&probe_path);
+
+    debug!("generated probes url: {}", &probe_url);
 
     // Generate request URI
-    let request_uri =
-        Uri::from_str(&report_generate_url(&probe_path)).expect("invalid probe request uri");
+    let request_uri = Uri::from_str(&probe_url).expect("invalid probe request uri");
 
     // Acquire probe response
     let mut response_body = Vec::new();
@@ -156,7 +157,8 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
         .read_timeout(Some(REPORT_HTTP_CLIENT_TIMEOUT))
         .write_timeout(Some(REPORT_HTTP_CLIENT_TIMEOUT))
         .method(Method::GET)
-        .headers(report_make_status_request_headers(None))
+        .header("User-Agent", &*REPORT_HTTP_HEADER_USERAGENT)
+        .header("Authorization", &*REPORT_HTTP_HEADER_AUTHORIZATION)
         .send(&mut response_body);
 
     // Acquire items

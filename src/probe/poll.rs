@@ -6,7 +6,6 @@
 
 use http_req::{
     request::{Method, Request},
-    response::Headers,
     uri::Uri,
 };
 use memmem::{Searcher, TwoWaySearcher};
@@ -216,7 +215,7 @@ fn proceed_replica_request_http(
         } else {
             Method::HEAD
         })
-        .headers(make_replica_request_headers())
+        .header("User-Agent", &*POLL_HTTP_HEADER_USERAGENT)
         .send(&mut response_body);
 
     // Handle response
@@ -285,12 +284,4 @@ fn acquire_dead_timeout(metrics: &Option<MapMetrics>) -> Duration {
     } else {
         20
     })
-}
-
-fn make_replica_request_headers() -> Headers {
-    let mut headers = Headers::new();
-
-    headers.insert("User-Agent", &*POLL_HTTP_HEADER_USERAGENT);
-
-    headers
 }

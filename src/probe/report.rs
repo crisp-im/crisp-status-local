@@ -7,7 +7,6 @@
 use base64;
 use http_req::{
     request::{Method, Request},
-    response::Headers,
     uri::Uri,
 };
 use serde_json;
@@ -36,9 +35,9 @@ struct ReportPayload<'a> {
 }
 
 lazy_static! {
-    static ref REPORT_HTTP_HEADER_USERAGENT: String =
+    pub static ref REPORT_HTTP_HEADER_USERAGENT: String =
         format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-    static ref REPORT_HTTP_HEADER_AUTHORIZATION: String = format!(
+    pub static ref REPORT_HTTP_HEADER_AUTHORIZATION: String = format!(
         "Basic {}",
         base64::encode(&format!(":{}", APP_CONF.report.token))
     );
@@ -46,20 +45,6 @@ lazy_static! {
 
 pub fn generate_url(path: &str) -> String {
     format!("{}/{}", &APP_CONF.report.endpoint, path)
-}
-
-pub fn make_status_request_headers(body_data: Option<&[u8]>) -> Headers {
-    let mut headers = Headers::new();
-
-    headers.insert("User-Agent", &*REPORT_HTTP_HEADER_USERAGENT);
-    headers.insert("Authorization", &*REPORT_HTTP_HEADER_AUTHORIZATION);
-
-    if let Some(body_data) = body_data {
-        headers.insert("Content-Type", "application/json");
-        headers.insert("Content-Length", &body_data.len());
-    }
-
-    headers
 }
 
 pub fn status(
@@ -143,7 +128,10 @@ fn status_request(
         .read_timeout(Some(REPORT_HTTP_CLIENT_TIMEOUT))
         .write_timeout(Some(REPORT_HTTP_CLIENT_TIMEOUT))
         .method(Method::POST)
-        .headers(make_status_request_headers(Some(&payload_json)))
+        .header("User-Agent", &*REPORT_HTTP_HEADER_USERAGENT)
+        .header("Authorization", &*REPORT_HTTP_HEADER_AUTHORIZATION)
+        .header("Content-Type", "application/json")
+        .header("Content-Length", &payload_json.len())
         .body(&payload_json)
         .send(&mut response_sink);
 
