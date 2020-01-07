@@ -12,19 +12,18 @@ extern crate clap;
 extern crate lazy_static;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
-extern crate time;
-extern crate toml;
-extern crate url;
 extern crate openssl_probe;
 extern crate reqwest;
+extern crate serde;
+extern crate toml;
+extern crate url;
 
 mod config;
 mod probe;
 
-use std::thread;
 use std::ops::Deref;
 use std::str::FromStr;
+use std::thread;
 use std::time::Duration;
 
 use clap::{App, Arg};
@@ -63,7 +62,9 @@ fn make_app_args() -> AppArgs {
         .get_matches();
 
     // Generate owned app arguments
-    AppArgs { config: String::from(matches.value_of("config").expect("invalid config value")) }
+    AppArgs {
+        config: String::from(matches.value_of("config").expect("invalid config value")),
+    }
 }
 
 fn ensure_states() {
@@ -104,9 +105,9 @@ fn main() {
     openssl_probe::init_ssl_cert_env_vars();
 
     // Initialize shared logger
-    let _logger = ConfigLogger::init(LevelFilter::from_str(&APP_CONF.server.log_level).expect(
-        "invalid log level",
-    ));
+    let _logger = ConfigLogger::init(
+        LevelFilter::from_str(&APP_CONF.server.log_level).expect("invalid log level"),
+    );
 
     info!("starting up");
 

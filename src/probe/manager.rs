@@ -7,7 +7,7 @@
 use std::thread;
 use std::time::Duration;
 
-use super::map::{Map, acquire as map_acquire};
+use super::map::{acquire as map_acquire, Map};
 use super::poll::dispatch as poll_dispatch;
 
 const PROBE_RUN_HOLD_SECONDS: u64 = 2;

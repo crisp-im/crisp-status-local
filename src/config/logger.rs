@@ -4,7 +4,7 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
-use log::{self, Log, Record, Level, Metadata, LevelFilter, SetLoggerError};
+use log::{self, Level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 
 pub struct ConfigLogger;
 

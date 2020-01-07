@@ -4,19 +4,18 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
-use reqwest::{Client, RedirectPolicy};
 use reqwest::header::{Headers, UserAgent};
-use time;
+use reqwest::{Client, RedirectPolicy};
 
-use std::thread;
-use std::time::SystemTime;
-use std::time::Duration;
 use std::net::{TcpStream, ToSocketAddrs};
+use std::thread;
+use std::time::Duration;
+use std::time::SystemTime;
 
-use super::report::status as report_status;
 use super::map::{MapMetrics, MapService, MapServiceNodeHTTP};
-use super::status::Status;
 use super::replica::ReplicaURL;
+use super::report::status as report_status;
+use super::status::Status;
 
 const NODE_HTTP_HEALTHY_ABOVE: u16 = 200;
 const NODE_HTTP_HEALTHY_BELOW: u16 = 400;
@@ -79,10 +78,7 @@ fn proceed_replica_attempt(
 ) -> Status {
     info!(
         "running replica scan attempt #{} on #{}:#{}:[{:?}]",
-        attempt,
-        service_id,
-        node_id,
-        replica
+        attempt, service_id, node_id, replica
     );
 
     match proceed_replica_request(service_id, node_id, replica, http, metrics) {
@@ -96,10 +92,7 @@ fn proceed_replica_attempt(
             } else {
                 warn!(
                     "replica scan attempt #{} failed on #{}:#{}:[{:?}], will retry after delay",
-                    attempt,
-                    service_id,
-                    node_id,
-                    replica
+                    attempt, service_id, node_id, replica
                 );
 
                 // Retry after delay
@@ -128,9 +121,7 @@ fn proceed_replica_request(
 ) -> Status {
     debug!(
         "scanning replica: #{}:#{}:[{:?}]",
-        service_id,
-        node_id,
-        replica
+        service_id, node_id, replica
     );
 
     let start_time = SystemTime::now();
@@ -164,10 +155,7 @@ fn proceed_replica_request_tcp(host: &str, port: u16, metrics: &Option<MapMetric
         if let Some(address_value) = address.next() {
             debug!("prober poll will fire for tcp target: {}", address_value);
 
-            return match TcpStream::connect_timeout(
-                &address_value,
-                acquire_dead_timeout(metrics),
-            ) {
+            return match TcpStream::connect_timeout(&address_value, acquire_dead_timeout(metrics)) {
                 Ok(_) => true,
                 Err(_) => false,
             };
@@ -182,7 +170,11 @@ fn proceed_replica_request_http(
     http: &Option<MapServiceNodeHTTP>,
     metrics: &Option<MapMetrics>,
 ) -> bool {
-    let url_bang = format!("{}?{}", url, time::now().to_timespec().sec);
+    let duration_since_epoch = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or(Duration::new(0, 0));
+
+    let url_bang = format!("{}?{}", url, duration_since_epoch.as_secs());
 
     debug!("prober poll will fire for http target: {}", &url_bang);
 
@@ -221,8 +213,7 @@ fn proceed_replica_request_http(
 
         debug!(
             "prober poll result received for url: {} with status: {}",
-            &url_bang,
-            status_code
+            &url_bang, status_code
         );
 
         // Unpack HTTP status codes
@@ -248,8 +239,7 @@ fn proceed_replica_request_http(
                 if let Ok(text) = response_inner.text() {
                     debug!(
                         "checking prober poll result response text for url: {} for any match: {}",
-                        &url_bang,
-                        &text
+                        &url_bang, &text
                     );
 
                     // Doesnt match? Consider as DOWN.

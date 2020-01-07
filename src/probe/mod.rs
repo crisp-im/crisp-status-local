@@ -5,8 +5,8 @@
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
 mod map;
-mod status;
 mod replica;
+mod status;
 
 pub mod manager;
 pub mod poll;

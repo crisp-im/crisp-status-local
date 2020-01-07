@@ -4,8 +4,8 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
-use reqwest::{Client, StatusCode, RedirectPolicy};
-use reqwest::header::{Headers, UserAgent, Authorization, Basic};
+use reqwest::header::{Authorization, Basic, Headers, UserAgent};
+use reqwest::{Client, RedirectPolicy, StatusCode};
 
 use std::thread;
 use std::time::Duration;
@@ -63,10 +63,7 @@ fn status_attempt(
 ) -> Result<(), ()> {
     info!(
         "running status report attempt #{} on #{}:#{}:[{:?}]",
-        attempt,
-        service.id,
-        node.id,
-        replica
+        attempt, service.id, node.id, replica
     );
 
     match status_request(service, node, replica, status, interval) {
@@ -79,10 +76,7 @@ fn status_attempt(
             } else {
                 warn!(
                     "status report attempt #{} failed on #{}:#{}:[{:?}], will retry after delay",
-                    attempt,
-                    service.id,
-                    node.id,
-                    replica
+                    attempt, service.id, node.id, replica
                 );
 
                 // Retry after delay
@@ -127,8 +121,7 @@ fn status_request(
             } else {
                 debug!(
                     "could not report to probe path: {} (got status: {})",
-                    report_path,
-                    status
+                    report_path, status
                 );
 
                 Err(())
@@ -137,8 +130,7 @@ fn status_request(
         Err(err) => {
             warn!(
                 "failed reporting to probe path: {} because: {}",
-                report_path,
-                err
+                report_path, err
             );
 
             Err(())

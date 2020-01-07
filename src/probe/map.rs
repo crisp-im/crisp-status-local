@@ -9,8 +9,8 @@ use std::time::Duration;
 
 use reqwest::StatusCode;
 
-use super::report::{REPORT_HTTP_CLIENT, generate_url as report_generate_url};
 use super::replica::ReplicaURL;
+use super::report::{generate_url as report_generate_url, REPORT_HTTP_CLIENT};
 
 const RETRY_ACQUIRE_TIMES: u8 = 2;
 const RETRY_ACQUIRE_AFTER_SECONDS: u64 = 5;
@@ -139,7 +139,8 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
     // Acquire items
     match REPORT_HTTP_CLIENT
         .get(&report_generate_url(&probe_path))
-        .send() {
+        .send()
+    {
         Ok(mut response_inner) => {
             let status = response_inner.status();
 
