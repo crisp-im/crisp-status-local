@@ -7,15 +7,15 @@ We consider here the packaging flow of `crisp-status-local` version `1.0.0` for 
 
 1. **How to setup `rust-musl-builder` on MacOS:**
     1. Follow setup instructions from: [rust-musl-builder](https://github.com/emk/rust-musl-builder)
-    2. Pull the nightly Docker image: `docker pull ekidd/rust-musl-builder:nightly`
+    2. Pull the stable Docker image: `docker pull ekidd/rust-musl-builder:stable`
 
 2. **How to bump `crisp-status-local` version before a release:**
     1. Bump version in `Cargo.toml` to `1.0.0`
     2. Execute `cargo update` to bump `Cargo.lock`
 
 3. **How to build `crisp-status-local` for Linux on MacOS:**
-    1. `rust-musl-builder-nightly cargo build --target=x86_64-unknown-linux-musl --release`
-    2. `rust-musl-builder-nightly strip ./target/x86_64-unknown-linux-musl/release/crisp-status-local`
+    1. `rust-musl-builder-stable cargo build --target=x86_64-unknown-linux-musl --release`
+    2. `rust-musl-builder-stable strip ./target/x86_64-unknown-linux-musl/release/crisp-status-local`
 
 4. **How to package built binary and release it on GitHub:**
     1. `mkdir crisp-status-local`
