@@ -8,7 +8,7 @@ use std::fmt;
 
 use serde::de::{Error, Visitor};
 use serde::{Deserialize, Deserializer};
-use url::Url;
+use url::{Host, Url};
 
 #[derive(Serialize, Debug, Clone)]
 pub enum ReplicaURL {
@@ -20,21 +20,17 @@ pub enum ReplicaURL {
 impl ReplicaURL {
     pub fn parse_from(raw_url: &str) -> Result<ReplicaURL, ()> {
         match Url::parse(raw_url) {
-            Ok(parsed_url) => match parsed_url.scheme() {
-                "tcp" => match (parsed_url.host_str(), parsed_url.port()) {
-                    (Some(host), Some(port)) => {
-                        Ok(ReplicaURL::TCP(raw_url.to_owned(), host.to_string(), port))
-                    }
+            Ok(url) => match url.scheme() {
+                "tcp" => match (url.host(), url.port()) {
+                    (Some(host), Some(port)) => Ok(ReplicaURL::TCP(
+                        raw_url.to_owned(),
+                        Self::host_string(host),
+                        port,
+                    )),
                     _ => Err(()),
                 },
-                "http" => Ok(ReplicaURL::HTTP(
-                    raw_url.to_owned(),
-                    parsed_url.into_string(),
-                )),
-                "https" => Ok(ReplicaURL::HTTPS(
-                    raw_url.to_owned(),
-                    parsed_url.into_string(),
-                )),
+                "http" => Ok(ReplicaURL::HTTP(raw_url.to_owned(), url.into_string())),
+                "https" => Ok(ReplicaURL::HTTPS(raw_url.to_owned(), url.into_string())),
                 _ => Err(()),
             },
             _ => Err(()),
@@ -46,6 +42,19 @@ impl ReplicaURL {
             &ReplicaURL::TCP(ref raw_url, _, _) => raw_url,
             &ReplicaURL::HTTP(ref raw_url, _) => raw_url,
             &ReplicaURL::HTTPS(ref raw_url, _) => raw_url,
+        }
+    }
+
+    fn host_string(host: Host<&str>) -> String {
+        // Convert internal host value into string. This is especially useful for IPv6 addresses, \
+        //   which we need returned in '::1' format; as they would otherwise be returned in \
+        //   '[::1]' format using built-in top-level 'to_string()' method on the 'Host' trait. The \
+        //   underlying address parser does not accept IPv6 addresses formatted as '[::1]', so \
+        //   this seemingly overkill processing is obviously needed.
+        match host {
+            Host::Domain(domain_value) => domain_value.to_string(),
+            Host::Ipv4(ipv4_value) => ipv4_value.to_string(),
+            Host::Ipv6(ipv6_value) => ipv6_value.to_string(),
         }
     }
 }
