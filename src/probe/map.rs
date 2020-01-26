@@ -216,6 +216,7 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
                                 // Alter map object
                                 map.date = response_json.data.date;
                                 map.services = response_json.data.services;
+                                map.metrics = response_json.data.metrics;
 
                                 Ok(())
                             }
