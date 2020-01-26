@@ -42,7 +42,7 @@ function release_for_architecture {
         docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly strip ./target/$2/release/crisp-status-local && \
         mkdir ./crisp-status-local && \
         mv "target/$2/release/crisp-status-local" ./crisp-status-local/ && \
-        cp -r ./config.cfg ./res crisp-status-local/ && \
+        cp ./config.cfg crisp-status-local/ && \
         tar -czvf "$final_tar" ./crisp-status-local && \
         rm -r ./crisp-status-local/
     release_result=$?
