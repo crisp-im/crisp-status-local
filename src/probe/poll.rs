@@ -4,14 +4,16 @@
 // Copyright: 2018, Crisp IM SARL
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
+use fastping_rs::{PingResult, Pinger};
 use http_req::{
     request::{Method, Request},
     uri::Uri,
 };
 use memmem::{Searcher, TwoWaySearcher};
 
+use std::cmp::min;
 use std::io::Read;
-use std::net::{TcpStream, ToSocketAddrs};
+use std::net::{SocketAddr, TcpStream, ToSocketAddrs};
 use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
@@ -23,6 +25,7 @@ use super::report::status as report_status;
 use super::status::Status;
 use crate::utilities::chunk::Decoder as ChunkDecoder;
 
+const NODE_ICMP_TIMEOUT_MILLISECONDS: u64 = 1000;
 const NODE_HTTP_HEALTHY_ABOVE: u16 = 200;
 const NODE_HTTP_HEALTHY_BELOW: u16 = 400;
 const RETRY_REPLICA_AFTER_MILLISECONDS: u64 = 200;
@@ -137,7 +140,8 @@ fn proceed_replica_request(
 
     let start_time = SystemTime::now();
 
-    let is_up = match replica {
+    let (is_up, poll_duration) = match replica {
+        &ReplicaURL::ICMP(ref host) => proceed_replica_request_icmp(host, metrics),
         &ReplicaURL::TCP(_, ref host, port) => proceed_replica_request_tcp(host, port, metrics),
         &ReplicaURL::HTTP(_, ref url) => proceed_replica_request_http(url, http, metrics),
         &ReplicaURL::HTTPS(_, ref url) => proceed_replica_request_http(url, http, metrics),
@@ -145,11 +149,17 @@ fn proceed_replica_request(
 
     if is_up == true {
         // Probe reports as sick?
-        if let Ok(duration_since) = SystemTime::now().duration_since(start_time) {
-            if let &Some(ref metrics_inner) = metrics {
-                if duration_since >= Duration::from_secs(metrics_inner.local.delay_sick) {
-                    return Status::Sick;
-                }
+        if let &Some(ref metrics_inner) = metrics {
+            // Acquire poll duration latency
+            let duration_latency = match poll_duration {
+                Some(poll_duration) => poll_duration,
+                None => SystemTime::now()
+                    .duration_since(start_time)
+                    .unwrap_or(Duration::from_secs(0)),
+            };
+
+            if duration_latency >= Duration::from_secs(metrics_inner.local.delay_sick) {
+                return Status::Sick;
             }
         }
 
@@ -159,7 +169,131 @@ fn proceed_replica_request(
     }
 }
 
-fn proceed_replica_request_tcp(host: &str, port: u16, metrics: &Option<MapMetrics>) -> bool {
+fn proceed_replica_request_icmp(
+    host: &str,
+    metrics: &Option<MapMetrics>,
+) -> (bool, Option<Duration>) {
+    // Notice: a dummy port of value '0' is set here, so that we can resolve the host to an actual \
+    //   IP address using the standard library, which avoids depending on an additional library.
+    let address_results = (host, 0).to_socket_addrs();
+
+    // Storage variable for the maximum round-trip-time found for received ping responses
+    let mut maximum_rtt = None;
+
+    match address_results {
+        Ok(address) => {
+            // Notice: the ICMP probe checker is a bit special, in the sense that it checks all \
+            //   resolved addresses. As we check for an host health at the IP level (ie. not at \
+            //   the application layer level), checking only the first host in the list is not \
+            //   sufficient for the whole replica group to be up. This can be used as an handy way \
+            //   to check for the health of a group of IP hosts, configured in a single DNS record.
+            let address_values: Vec<SocketAddr> = address.collect();
+
+            if !address_values.is_empty() {
+                debug!(
+                    "prober poll will fire for icmp host: {} ({} targets)",
+                    host,
+                    address_values.len()
+                );
+
+                // As ICMP pings require a lower-than-usual timeout, an hard-coded ICMP \
+                //   timeout value is used by default, though the configured dead delay value \
+                //   is preferred in the event it is lower than the hard-coded value (unlikely \
+                //   though possible in some setups).
+                let pinger_timeout = min(
+                    NODE_ICMP_TIMEOUT_MILLISECONDS,
+                    acquire_dead_timeout(metrics).as_secs() * 1000,
+                );
+
+                let (pinger, results) =
+                    Pinger::new(Some(pinger_timeout), None).expect("failed to create icmp pinger");
+
+                // Probe all returned addresses (sequentially)
+                for address_value in &address_values {
+                    let address_ip = address_value.ip();
+
+                    debug!(
+                        "prober poll will send icmp ping to target: {} from host: {}",
+                        address_ip, host
+                    );
+
+                    pinger.add_ipaddr(&address_ip.to_string());
+                }
+
+                pinger.ping_once();
+
+                for _ in &address_values {
+                    match results.recv() {
+                        Ok(result) => match result {
+                            PingResult::Receive { addr, rtt } => {
+                                debug!(
+                                    "got prober poll result for icmp target: {} from host: {}",
+                                    addr, host
+                                );
+
+                                // Do not return (consider address as reachable)
+                                // Notice: update maximum observed round-trip-time, if higher than \
+                                //   last highest observed.
+                                maximum_rtt = match maximum_rtt {
+                                    Some(maximum_rtt) => {
+                                        if rtt > maximum_rtt {
+                                            Some(rtt)
+                                        } else {
+                                            Some(maximum_rtt)
+                                        }
+                                    }
+                                    None => Some(rtt),
+                                };
+                            }
+                            PingResult::Idle { addr } => {
+                                debug!(
+                                    "prober poll host idle for icmp target: {} from host: {}",
+                                    addr, host
+                                );
+
+                                // Consider ICMP idle hosts as a failure (ie. routable, but \
+                                //   unreachable)
+                                return (false, None);
+                            }
+                        },
+                        Err(err) => {
+                            debug!("prober poll error for icmp host: {} (error: {})", host, err);
+
+                            // Consider ICMP errors as a failure
+                            return (false, None);
+                        }
+                    };
+                }
+            } else {
+                debug!(
+                    "prober poll did not resolve any address for icmp replica: {}",
+                    host
+                );
+
+                // Consider empty as a failure
+                return (false, None);
+            }
+        }
+        Err(err) => {
+            error!(
+                "prober poll address for icmp replica is invalid: {} (error: {})",
+                host, err
+            );
+
+            // Consider invalid URL as a failure
+            return (false, None);
+        }
+    };
+
+    // If there was no early return, consider all the hosts as reachable for replica
+    (true, maximum_rtt)
+}
+
+fn proceed_replica_request_tcp(
+    host: &str,
+    port: u16,
+    metrics: &Option<MapMetrics>,
+) -> (bool, Option<Duration>) {
     let address_results = (host, port).to_socket_addrs();
 
     if let Ok(mut address) = address_results {
@@ -167,20 +301,20 @@ fn proceed_replica_request_tcp(host: &str, port: u16, metrics: &Option<MapMetric
             debug!("prober poll will fire for tcp target: {}", address_value);
 
             return match TcpStream::connect_timeout(&address_value, acquire_dead_timeout(metrics)) {
-                Ok(_) => true,
-                Err(_) => false,
+                Ok(_) => (true, None),
+                Err(_) => (false, None),
             };
         }
     }
 
-    false
+    (false, None)
 }
 
 fn proceed_replica_request_http(
     url: &str,
     http: &Option<MapServiceNodeHTTP>,
     metrics: &Option<MapMetrics>,
-) -> bool {
+) -> (bool, Option<Duration>) {
     debug!("prober poll will fire for http target: {}", &url);
 
     // Unpack HTTP body match
@@ -276,24 +410,24 @@ fn proceed_replica_request_http(
                         .search_in(&response_body);
 
                     if text_search.is_none() {
-                        return false;
+                        return (false, None);
                     }
                 } else {
                     debug!("could not unpack response text for url: {}", &url);
 
                     // Consider as DOWN (the response text could not be checked)
-                    return false;
+                    return (false, None);
                 }
             }
 
-            return true;
+            return (true, None);
         }
     } else {
         debug!("prober poll result was not received for url: {}", &url);
     }
 
     // Consider as DOWN.
-    false
+    (false, None)
 }
 
 fn acquire_dead_timeout(metrics: &Option<MapMetrics>) -> Duration {

@@ -13,6 +13,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde_derive;
 extern crate base64;
+extern crate fastping_rs;
 extern crate http_req;
 extern crate memmem;
 extern crate serde;

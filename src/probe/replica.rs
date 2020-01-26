@@ -12,6 +12,7 @@ use url::{Host, Url};
 
 #[derive(Serialize, Debug, Clone)]
 pub enum ReplicaURL {
+    ICMP(String),
     TCP(String, String, u16),
     HTTP(String, String),
     HTTPS(String, String),
@@ -21,6 +22,10 @@ impl ReplicaURL {
     pub fn parse_from(raw_url: &str) -> Result<ReplicaURL, ()> {
         match Url::parse(raw_url) {
             Ok(url) => match url.scheme() {
+                "icmp" => match url.host() {
+                    Some(host) => Ok(ReplicaURL::ICMP(Self::host_string(host))),
+                    _ => Err(()),
+                },
                 "tcp" => match (url.host(), url.port()) {
                     (Some(host), Some(port)) => Ok(ReplicaURL::TCP(
                         raw_url.to_owned(),
@@ -39,6 +44,7 @@ impl ReplicaURL {
 
     pub fn get_raw(&self) -> &str {
         match self {
+            &ReplicaURL::ICMP(ref raw_url) => raw_url,
             &ReplicaURL::TCP(ref raw_url, _, _) => raw_url,
             &ReplicaURL::HTTP(ref raw_url, _) => raw_url,
             &ReplicaURL::HTTPS(ref raw_url, _) => raw_url,
