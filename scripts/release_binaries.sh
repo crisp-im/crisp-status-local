@@ -38,8 +38,8 @@ function release_for_architecture {
     final_tar="v$CRISP_STATUS_LOCAL_VERSION-$1.tar.gz"
 
     rm -rf ./crisp-status-local/ && \
-        docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly cargo build --target=$2 --release && \
-        docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly strip ./target/$2/release/crisp-status-local && \
+        docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:stable cargo build --target=$2 --release && \
+        docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:stable strip ./target/$2/release/crisp-status-local && \
         mkdir ./crisp-status-local && \
         mv "target/$2/release/crisp-status-local" ./crisp-status-local/ && \
         cp ./config.cfg crisp-status-local/ && \
