@@ -141,7 +141,7 @@ fn proceed_replica_request(
     let start_time = SystemTime::now();
 
     let (is_up, poll_duration) = match replica {
-        &ReplicaURL::ICMP(ref host) => proceed_replica_request_icmp(host, metrics),
+        &ReplicaURL::ICMP(_, ref host) => proceed_replica_request_icmp(host, metrics),
         &ReplicaURL::TCP(_, ref host, port) => proceed_replica_request_tcp(host, port, metrics),
         &ReplicaURL::HTTP(_, ref url) => proceed_replica_request_http(url, http, metrics),
         &ReplicaURL::HTTPS(_, ref url) => proceed_replica_request_http(url, http, metrics),
