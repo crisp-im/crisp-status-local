@@ -76,7 +76,7 @@ impl<'de> Deserialize<'de> for ReplicaURL {
             type Value = ReplicaURL;
 
             fn expecting(&self, format: &mut fmt::Formatter) -> fmt::Result {
-                format.write_str("a TCP, HTTP or HTTPS url")
+                format.write_str("an ICMP, TCP, HTTP or HTTPS url")
             }
 
             fn visit_str<E: Error>(self, value: &str) -> Result<ReplicaURL, E> {
