@@ -1,7 +1,7 @@
 Crisp Status Local
 ==================
 
-[![Build Status](https://travis-ci.org/crisp-im/crisp-status-local.svg?branch=master)](https://travis-ci.org/crisp-im/crisp-status-local) [![Dependency Status](https://deps.rs/repo/github/crisp-im/crisp-status-local/status.svg)](https://deps.rs/repo/github/crisp-im/crisp-status-local)
+[![Build Status](https://travis-ci.org/crisp-im/crisp-status-local.svg?branch=master)](https://travis-ci.org/crisp-im/crisp-status-local)
 
 **Crisp Status Local is used to monitor internal hosts and report their status to Crisp Status.**
 
