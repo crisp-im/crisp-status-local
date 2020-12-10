@@ -10,10 +10,6 @@ keywords = ["crisp", "crisp-status", "infrastructure", "status", "monitor"]
 categories = ["web-programming"]
 authors = ["Valerian Saliou <valerian@crisp.chat>"]
 
-[badges]
-travis-ci = { repository = "crisp-im/crisp-status-local", branch = "master" }
-coveralls = { repository = "crisp-im/crisp-status-local", branch = "master", service = "github" }
-
 [[bin]]
 name = "crisp-status-local"
 path = "src/main.rs"

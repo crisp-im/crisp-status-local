@@ -1,7 +1,7 @@
 Crisp Status Local
 ==================
 
-[![Build Status](https://travis-ci.org/crisp-im/crisp-status-local.svg?branch=master)](https://travis-ci.org/crisp-im/crisp-status-local)
+[![Test and Build](https://github.com/crisp-im/crisp-status-local/workflows/Test%20and%20Build/badge.svg?branch=master)](https://github.com/crisp-im/crisp-status-local/actions?query=workflow%3A%22Test+and+Build%22)
 
 **Crisp Status Local is used to monitor internal hosts and report their status to Crisp Status.**
 
