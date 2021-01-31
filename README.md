@@ -124,5 +124,3 @@ You can find more help on our helpdesk article: [How to setup the Crisp Status L
 If you find a vulnerability in Crisp Status Local, you are more than welcome to report it directly to [@crisp-im](https://github.com/crisp-im) by sending an encrypted email to [security@crisp.chat](mailto:security@crisp.chat). Do not report vulnerabilities in public GitHub issues, as they may be exploited by malicious people to target production servers running an unpatched Crisp Status Local server.
 
 **:warning: You must encrypt your email using [@crisp-im](https://github.com/crisp-im) GPG public key: [:key:8AD28DC5.asc](https://docs.crisp.chat/assets/keys/8AD28DC5.asc).**
-
-**:gift: Based on the severity of the vulnerability, Crisp (ie. us, the company) may offer a $100 (US) bounty to whomever reported it.**
