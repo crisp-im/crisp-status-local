@@ -1,7 +1,7 @@
 // crisp-status-local
 //
 // Crisp Status local probe relay
-// Copyright: 2020, Crisp IM SARL
+// Copyright: 2020, Crisp IM SAS
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
 // Reference: original source code for this utility from `frewsxcv/rust-chunked-transfer`: \

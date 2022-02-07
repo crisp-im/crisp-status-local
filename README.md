@@ -9,7 +9,7 @@ Crisp Status Local is a daemon that you can use to report internal service healt
 
 Install Crisp Status Local on a server of yours and configure it with your Crisp Status token; it will then automatically start monitoring all nodes that you configured in Crisp in `local` mode. The `local` mode is similar to `poll` mode, but is used specifically for `crisp-status-local` monitoring.
 
-Copyright 2018 Crisp IM SARL. See LICENSE for copying information.
+Copyright 2018 Crisp IM SAS. See LICENSE for copying information.
 
 _Tested at Rust version: `rustc 1.40.0 (73528e339 2019-12-16)`_
 
