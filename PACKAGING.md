@@ -15,7 +15,7 @@ We consider here the packaging flow of `crisp-status-local` version `1.0.0` for 
 3. **How to build `crisp-status-local`, package it and release it on GitHub (multiple architectures):**
     1. Install the cross-compilation utility: `cargo install cross`
     2. Release all binaries: `./scripts/release_binaries.sh --version=1.0.0`
-    3. Publish all the built archives on the [releases](https://github.com/crisp-im/crisp-status-local/releases) page on GitHub
+    3. Publish all the built archives and their signatures on the [releases](https://github.com/crisp-im/crisp-status-local/releases) page on GitHub
 
 4. **How to update Docker image:**
     1. `docker build .`
