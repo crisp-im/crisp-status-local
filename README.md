@@ -1,7 +1,7 @@
 Crisp Status Local
 ==================
 
-[![Test and Build](https://github.com/crisp-im/crisp-status-local/workflows/Test%20and%20Build/badge.svg?branch=master)](https://github.com/crisp-im/crisp-status-local/actions?query=workflow%3A%22Test+and+Build%22)
+[![Test and Build](https://github.com/crisp-im/crisp-status-local/workflows/Test%20and%20Build/badge.svg?branch=master)](https://github.com/crisp-im/crisp-status-local/actions?query=workflow%3A%22Test+and+Build%22) [![Build and Release](https://github.com/crisp-im/crisp-status-local/workflows/Build%20and%20Release/badge.svg)](https://github.com/crisp-im/crisp-status-local/actions?query=workflow%3A%22Build+and+Release%22)
 
 **Crisp Status Local is used to monitor internal hosts and report their status to Crisp Status.**
 
@@ -52,13 +52,13 @@ You might find it convenient to run Crisp Status Local via Docker. You can find 
 First, pull the `crispim/crisp-status-local` image:
 
 ```bash
-docker pull crispim/crisp-status-local:v1.3.0
+docker pull crispim/crisp-status-local:v1.3.1
 ```
 
 Then, seed it a configuration file and run it (replace `/path/to/your/crisp-status-local/config.cfg` with the path to your configuration file):
 
 ```bash
-docker run -v /path/to/your/crisp-status-local/config.cfg:/etc/crisp-status-local.cfg crispim/crisp-status-local:v1.3.0
+docker run -v /path/to/your/crisp-status-local/config.cfg:/etc/crisp-status-local.cfg crispim/crisp-status-local:v1.3.1
 ```
 
 In the configuration file, ensure that:
