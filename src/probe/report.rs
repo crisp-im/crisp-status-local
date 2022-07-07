@@ -20,7 +20,7 @@ use super::map::{MapService, MapServiceNode};
 use super::replica::ReplicaURL;
 use super::status::Status;
 
-use APP_CONF;
+use crate::APP_CONF;
 
 pub const REPORT_HTTP_CLIENT_TIMEOUT: Duration = Duration::from_secs(20);
 
