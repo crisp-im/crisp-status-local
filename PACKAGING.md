@@ -12,12 +12,8 @@ We consider here the packaging flow of `crisp-status-local` version `1.0.0` for 
 2. **How to update `crisp-status-local` on Crates:**
     1. Publish package on Crates: `cargo publish --no-verify`
 
-3. **How to build `crisp-status-local`, package it and release it on GitHub (multiple architectures):**
-    1. Install the cross-compilation utility: `cargo install cross`
-    2. Release all binaries: `./scripts/release_binaries.sh --version=1.0.0`
-    3. Publish all the built archives and their signatures on the [releases](https://github.com/crisp-im/crisp-status-local/releases) page on GitHub
-
-4. **How to update Docker image:**
-    1. `docker build .`
-    2. `docker tag [DOCKER_IMAGE_ID] crispim/crisp-status-local:v1.0.0` (insert the built image identifier)
-    3. `docker push crispim/crisp-status-local:v1.0.0`
+3. **How to build `crisp-status-local`, package it and release it on GitHub and Docker Hub (multiple architectures):**
+    1. Tag the latest Git commit corresponding to the release with tag `v1.0.0`, and push the tag
+    2. Wait for all release jobs to complete on the [actions](https://github.com/crisp-im/crisp-status-local/actions) page on GitHub
+    3. Download all release archives, and sign them locally using: `./scripts/sign_binaries.sh --version=1.0.0`
+    4. Publish a changelog and upload all the built archives, as well as their signatures on the [releases](https://github.com/crisp-im/crisp-status-local/releases) page on GitHub
