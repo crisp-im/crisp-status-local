@@ -15,7 +15,8 @@ while [ "$1" != "" ]; do
 
     case $argument_key in
         -v | --version)
-            CRISP_STATUS_LOCAL_VERSION="$argument_value"
+            # Notice: strip any leading 'v' to the version number
+            CRISP_STATUS_LOCAL_VERSION="${argument_value/v}"
             ;;
         *)
             echo "Unknown argument received: '$argument_key'"
@@ -39,7 +40,7 @@ function release_for_architecture {
     gpg_signer="security@crisp.chat"
 
     rm -rf ./crisp-status-local/ && \
-        RUSTFLAGS="-C link-arg=-s" cross build --target "$2" --release && \
+        cross build --target "$2" --release && \
         mkdir ./crisp-status-local && \
         cp -p "target/$2/release/crisp-status-local" ./crisp-status-local/ && \
         cp ./config.cfg crisp-status-local/ && \
