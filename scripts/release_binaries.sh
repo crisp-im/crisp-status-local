@@ -43,7 +43,7 @@ function release_for_architecture {
         mkdir ./crisp-status-local && \
         cp -p "target/$2/release/crisp-status-local" ./crisp-status-local/ && \
         cp ./config.cfg crisp-status-local/ && \
-        tar -czvf "$final_tar" ./crisp-status-local && \
+        tar --owner=0 --group=0 -czvf "$final_tar" ./crisp-status-local && \
         rm -r ./crisp-status-local/
     release_result=$?
 
