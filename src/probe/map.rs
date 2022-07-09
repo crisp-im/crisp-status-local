@@ -174,7 +174,8 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
                     // Status is: 'OK'
 
                     // Read response MIME type
-                    let content_type = response.headers()
+                    let content_type = response
+                        .headers()
                         .get("Content-Type")
                         .map(|value| value.to_owned())
                         .unwrap_or("".to_string());
