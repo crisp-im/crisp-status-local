@@ -13,7 +13,6 @@ use memmem::{Searcher, TwoWaySearcher};
 
 use std::cmp::min;
 use std::convert::TryFrom;
-use std::io::Read;
 use std::net::{SocketAddr, TcpStream, ToSocketAddrs};
 use std::thread;
 use std::time::Duration;
@@ -23,7 +22,6 @@ use super::map::{MapMetrics, MapService, MapServiceNodeHTTP};
 use super::replica::ReplicaURL;
 use super::report::status as report_status;
 use super::status::Status;
-use crate::utilities::chunk::Decoder as ChunkDecoder;
 
 const NODE_ICMP_TIMEOUT_MILLISECONDS: u64 = 1000;
 const NODE_HTTP_HEALTHY_ABOVE: u16 = 200;
@@ -385,28 +383,6 @@ fn proceed_replica_request_http(
                         "checking prober poll result response text for url: {} for any match",
                         &url
                     );
-
-                    // Check transfer encoding of response body
-                    let transfer_encoding = response
-                        .headers()
-                        .get("Transfer-Encoding")
-                        .map(|value| value.to_owned())
-                        .unwrap_or("identity".to_string());
-
-                    // Decode body using an appropriate decoding method
-                    response_body = if transfer_encoding == "chunked" {
-                        // Decode chunked HTTP encoding
-                        let mut response_body_decoded = Vec::new();
-
-                        let mut chunked_decoder = ChunkDecoder::new(response_body.as_slice());
-
-                        chunked_decoder.read_to_end(&mut response_body_decoded).ok();
-
-                        response_body_decoded
-                    } else {
-                        // Return identity
-                        response_body
-                    };
 
                     // Doesnt match? Consider as DOWN.
                     let text_search = TwoWaySearcher::new(http_body_healthy_match_inner.as_bytes())

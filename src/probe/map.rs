@@ -11,7 +11,6 @@ use http_req::{
 use serde_json;
 
 use std::convert::TryFrom;
-use std::io::Read;
 use std::thread;
 use std::time::Duration;
 
@@ -20,7 +19,6 @@ use super::report::{
     generate_url as report_generate_url, REPORT_HTTP_CLIENT_TIMEOUT,
     REPORT_HTTP_HEADER_AUTHORIZATION, REPORT_HTTP_HEADER_USERAGENT,
 };
-use crate::utilities::chunk::Decoder as ChunkDecoder;
 
 const RETRY_ACQUIRE_TIMES: u8 = 2;
 const RETRY_ACQUIRE_AFTER_SECONDS: u64 = 5;
@@ -178,37 +176,13 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
                     // Read response headers
                     let headers = response.headers();
 
-                    let (content_type, transfer_encoding) = (
-                        headers
-                            .get("Content-Type")
-                            .map(|value| value.to_owned())
-                            .unwrap_or("".to_string()),
-                        headers
-                            .get("Transfer-Encoding")
-                            .map(|value| value.to_owned())
-                            .unwrap_or("identity".to_string()),
-                    );
+                    let content_type = headers
+                        .get("Content-Type")
+                        .map(|value| value.to_owned())
+                        .unwrap_or("".to_string());
 
                     // Validate response
-                    if content_type.starts_with("application/json")
-                        && (transfer_encoding == "identity" || transfer_encoding == "chunked")
-                        && !response_body.is_empty()
-                    {
-                        // Decode body using an appropriate decoding method
-                        response_body = if transfer_encoding == "chunked" {
-                            // Decode chunked HTTP encoding
-                            let mut response_body_decoded = Vec::new();
-
-                            let mut chunked_decoder = ChunkDecoder::new(response_body.as_slice());
-
-                            chunked_decoder.read_to_end(&mut response_body_decoded).ok();
-
-                            response_body_decoded
-                        } else {
-                            // Return identity
-                            response_body
-                        };
-
+                    if content_type.starts_with("application/json") && !response_body.is_empty() {
                         match serde_json::from_slice::<MapFromResponse>(&response_body) {
                             Ok(response_json) => {
                                 info!("acquired probe map with changes");
@@ -228,8 +202,8 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
                         }
                     } else {
                         warn!(
-                            "received headers not expected for probe map acquire: '{}' / '{}'",
-                            content_type, transfer_encoding
+                            "received headers not expected for probe map acquire: '{}'",
+                            content_type
                         );
 
                         Err(MapError::InvalidData)
