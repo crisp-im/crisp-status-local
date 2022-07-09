@@ -55,8 +55,8 @@ fn make_app_args() -> AppArgs {
         .author(crate_authors!("\n"))
         .about(crate_description!())
         .arg(
-            Arg::with_name("config")
-                .short("c")
+            Arg::new("config")
+                .short('c')
                 .long("config")
                 .help("Path to configuration file")
                 .default_value("./config.cfg")

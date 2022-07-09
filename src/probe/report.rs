@@ -11,8 +11,8 @@ use http_req::{
 };
 use serde_json;
 
+use std::convert::TryFrom;
 use std::io;
-use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 
@@ -117,7 +117,7 @@ fn status_request(
     let payload_json = serde_json::to_vec(&payload).expect("invalid status request payload");
 
     // Generate request URI
-    let request_uri = Uri::from_str(&report_url).expect("invalid status request uri");
+    let request_uri = Uri::try_from(report_url.as_str()).expect("invalid status request uri");
 
     // Acquire report response
     let mut response_sink = io::sink();

@@ -10,8 +10,8 @@ use http_req::{
 };
 use serde_json;
 
+use std::convert::TryFrom;
 use std::io::Read;
-use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 
@@ -149,7 +149,7 @@ fn acquire_request(map: &mut Map) -> Result<(), MapError> {
     debug!("generated probes url: {}", &probe_url);
 
     // Generate request URI
-    let request_uri = Uri::from_str(&probe_url).expect("invalid probe request uri");
+    let request_uri = Uri::try_from(probe_url.as_str()).expect("invalid probe request uri");
 
     // Acquire probe response
     let mut response_body = Vec::new();

@@ -18,16 +18,16 @@ doc = false
 
 [dependencies]
 log = "0.4"
-clap = { version = "2.33", default-features = false }
+clap = { version = "3.2", features = ["std", "cargo"] }
 lazy_static = "1.4"
 serde = { version = "1.0", default-features = false }
 serde_derive = "1.0"
 serde_json = "1.0"
 toml = "0.5"
 url = { version = "2.1", default-features = false }
-fastping-rs = "0.1"
-http_req = { version = "0.5", features = ["rust-tls"], default-features = false }
-base64 = "0.11"
+fastping-rs = "0.2"
+http_req = { version = "0.8", features = ["rust-tls"], default-features = false }
+base64 = "0.13"
 memmem = { version = "0.1", default-features = false }
 
 [profile.dev]

@@ -12,9 +12,9 @@ use http_req::{
 use memmem::{Searcher, TwoWaySearcher};
 
 use std::cmp::min;
+use std::convert::TryFrom;
 use std::io::Read;
 use std::net::{SocketAddr, TcpStream, ToSocketAddrs};
-use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 use std::time::SystemTime;
@@ -333,10 +333,13 @@ fn proceed_replica_request_http(
     // Unpack dead timeout
     let dead_timeout = acquire_dead_timeout(metrics);
 
+    // Generate request URI
+    let request_uri = Uri::try_from(url).expect("invalid replica request uri");
+
     // Acquire replica response
     let mut response_body = Vec::new();
 
-    let response = Request::new(&Uri::from_str(&url).expect("invalid replica request uri"))
+    let response = Request::new(&request_uri)
         .connect_timeout(Some(dead_timeout))
         .read_timeout(Some(dead_timeout))
         .write_timeout(Some(dead_timeout))
