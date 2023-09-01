@@ -1,0 +1,13 @@
+Source: crisp-status-local
+Section: net
+Priority: ext
+Maintainer: Valerian Saliou <valerian@crisp.chat>
+Standards-Version: 3.9.4
+Build-Depends: wget, ca-certificates
+Homepage: https://github.com/crisp-im/crisp-status-local
+
+Package: crisp-status-local
+Architecture: any
+Depends: adduser
+Provides: crisp-status-local
+Description: Crisp Status Local. Used to monitor internal hosts and report their status to Crisp Status.

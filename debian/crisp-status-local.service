@@ -1,0 +1,13 @@
+[Unit]
+Description=Crisp Status Local monitors internal hosts and report their status to Crisp Status
+After=network.target
+
+[Service]
+Type=simple
+User=crisp-status-local
+Group=crisp-status-local
+ExecStart=/usr/bin/crisp-status-local -c /etc/crisp-status-local.cfg
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
