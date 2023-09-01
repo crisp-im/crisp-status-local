@@ -71,7 +71,7 @@ Crisp Status Local provides [pre-built packages](https://packagecloud.io/crisp-i
 
 **Important: Crisp Status Local only provides 64 bits packages targeting Debian 10, 11 & 12 for now (codenames: `buster`, `bullseye` & `bookworm`). You will still be able to use them on other Debian versions, as well as Ubuntu.**
 
-**1️⃣ Add the Crisp Status Local APT repository (eg. for Debian `bookworm`):**
+**First, add the Crisp Status Local APT repository (eg. for Debian `bookworm`):**
 
 ```bash
 echo "deb https://packagecloud.io/crisp-im/crisp-status-local/debian/ bookworm main" > /etc/apt/sources.list.d/crisp-im_crisp-status-local.list
@@ -85,19 +85,19 @@ curl --silent -L https://packagecloud.io/crisp-im/crisp-status-local/gpgkey | ap
 apt-get update
 ```
 
-**2️⃣ Install the Crisp Status Local package:**
+**Then, install the Crisp Status Local package:**
 
 ```bash
 apt-get install crisp-status-local
 ```
 
-**3️⃣ Edit the pre-filled Crisp Status Local configuration file:**
+**Then, edit the pre-filled Crisp Status Local configuration file:**
 
 ```bash
 nano /etc/crisp-status-local.cfg
 ```
 
-**4️⃣ Restart Crisp Status Local:**
+**Finally, restart Crisp Status Local:**
 
 ```
 service crisp-status-local restart
