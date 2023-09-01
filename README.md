@@ -65,7 +65,45 @@ In the configuration file, ensure that:
 
 * `report.token` is set to your Crisp Status Reporter token (you can get it on your Crisp dashboard)
 
-#### B. Install from binary
+#### B. Install from packages
+
+Crisp Status Local provides [pre-built packages](https://packagecloud.io/crisp-im/crisp-status-local) for Debian-based systems (Debian, Ubuntu, etc.).
+
+**Important: Crisp Status Local only provides 64 bits packages targeting Debian 10, 11 & 12 for now (codenames: `buster`, `bullseye` & `bookworm`). You will still be able to use them on other Debian versions, as well as Ubuntu.**
+
+**1️⃣ Add the Crisp Status Local APT repository (eg. for Debian `bookworm`):**
+
+```bash
+echo "deb https://packagecloud.io/crisp-im/crisp-status-local/debian/ bookworm main" > /etc/apt/sources.list.d/crisp-im_crisp-status-local.list
+```
+
+```bash
+curl --silent -L https://packagecloud.io/crisp-im/crisp-status-local/gpgkey | apt-key add -
+```
+
+```bash
+apt-get update
+```
+
+**2️⃣ Install the Crisp Status Local package:**
+
+```bash
+apt-get install crisp-status-local
+```
+
+**3️⃣ Edit the pre-filled Crisp Status Local configuration file:**
+
+```bash
+nano /etc/crisp-status-local.cfg
+```
+
+**4️⃣ Restart Crisp Status Local:**
+
+```
+service crisp-status-local restart
+```
+
+#### C. Install from binary
 
 A pre-built binary of Crisp Status Local is shared in the releases on GitHub. You can simply download the latest binary version from the [releases page](https://github.com/crisp-im/crisp-status-local/releases), and run it on your server. Each release binary comes with an `.asc` signature file, which can be verified using [Crisp GPG key](https://docs.crisp.chat/guides/others/security-practices/#vulnerability-disclosures).
 
@@ -73,7 +111,7 @@ You will still need to provide the binary with the configuration file, so make s
 
 _The binary provided is statically-linked, which means that it will be able to run on any Linux-based server. Still, it will not work on MacOS or Windows machines._
 
-#### C. Install from Cargo
+#### D. Install from Cargo
 
 If you prefer managing `crisp-status-local` via Rust's Cargo, install it directly via `cargo install`:
 
@@ -83,7 +121,7 @@ cargo install crisp-status-local
 
 Ensure that your `$PATH` is properly configured to source the Crates binaries, and then run Crisp Status Local using the `crisp-status-local` command.
 
-#### D. Build from source
+#### E. Build from source
 
 The last option is to pull the source code from Git and compile Crisp Status Local via `cargo`:
 
