@@ -12,7 +12,7 @@ override_dh_auto_clean:
 override_dh_auto_test:
 override_dh_auto_build:
 override_dh_auto_install:
-		$(eval ENV_ARCH := $(shell dpkg --print-architecture))
+		$(eval ENV_ARCH := $(shell dpkg --print-architecture | sed "s/^amd64$/x86_64/"))
 		$(eval ENV_TARBALL := v$(VERSION)-$(ENV_ARCH).tar.gz)
 
 		echo "Architecture: $(ENV_ARCH)"
