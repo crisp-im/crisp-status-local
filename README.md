@@ -74,11 +74,11 @@ Crisp Status Local provides [pre-built packages](https://packagecloud.io/crisp-i
 First, add the Crisp Status Local APT repository (eg. for Debian `bookworm`):
 
 ```bash
-echo "deb https://packagecloud.io/crisp-im/crisp-status-local/debian/ bookworm main" > /etc/apt/sources.list.d/crisp-im_crisp-status-local.list
+echo "deb [signed-by=/usr/share/keyrings/crisp-im_crisp-status-local.gpg] https://packagecloud.io/crisp-im/crisp-status-local/debian/ bookworm main" > /etc/apt/sources.list.d/crisp-im_crisp-status-local.list
 ```
 
 ```bash
-curl --silent -L https://packagecloud.io/crisp-im/crisp-status-local/gpgkey | apt-key add -
+curl -fsSL https://packagecloud.io/crisp-im/crisp-status-local/gpgkey | gpg --dearmor -o /usr/share/keyrings/crisp-im_crisp-status-local.gpg
 ```
 
 ```bash
