@@ -52,13 +52,13 @@ You might find it convenient to run Crisp Status Local via Docker. You can find 
 First, pull the `crispim/crisp-status-local` image:
 
 ```bash
-docker pull crispim/crisp-status-local:v1.3.7
+docker pull crispim/crisp-status-local:v1.4.0
 ```
 
 Then, seed it a configuration file and run it (replace `/path/to/your/crisp-status-local/config.cfg` with the path to your configuration file):
 
 ```bash
-docker run -v /path/to/your/crisp-status-local/config.cfg:/etc/crisp-status-local.cfg crispim/crisp-status-local:v1.3.7
+docker run -v /path/to/your/crisp-status-local/config.cfg:/etc/crisp-status-local.cfg crispim/crisp-status-local:v1.4.0
 ```
 
 In the configuration file, ensure that:
