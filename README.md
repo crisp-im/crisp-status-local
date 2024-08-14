@@ -135,6 +135,8 @@ You can find the built binaries in the `./target/release` directory.
 
 Use the sample [config.cfg](https://github.com/crisp-im/crisp-status-local/blob/master/config.cfg) configuration file and adjust it to your own environment.
 
+You can also use environment variables with string interpolation in your configuration file, eg. `token = ${CRISP_STATUS_TOKEN}`.
+
 **Available configuration options are commented below, with allowed values:**
 
 **[server]**

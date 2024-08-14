@@ -24,6 +24,7 @@ serde = { version = "1.0", default-features = false }
 serde_derive = "1.0"
 serde_json = "1.0"
 toml = "0.5"
+envsubst = "0.2"
 url = { version = "2.1", default-features = false }
 fastping-rs = "0.2"
 http_req = { version = "0.8", features = ["rust-tls"], default-features = false }
