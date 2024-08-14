@@ -37,23 +37,7 @@ pub struct Map {
 
 #[derive(Deserialize)]
 pub struct MapMetrics {
-    pub poll: MapMetricsPoll,
-    pub push: MapMetricsPush,
     pub local: MapMetricsLocal,
-}
-
-#[derive(Deserialize)]
-pub struct MapMetricsPoll {
-    pub retry: u8,
-    pub delay_dead: u64,
-    pub delay_sick: u64,
-}
-
-#[derive(Deserialize)]
-pub struct MapMetricsPush {
-    pub delay_dead: u64,
-    pub system_cpu_sick_above: f32,
-    pub system_ram_sick_above: f32,
 }
 
 #[derive(Deserialize)]
