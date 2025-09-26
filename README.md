@@ -69,7 +69,7 @@ In the configuration file, ensure that:
 
 Crisp Status Local provides [pre-built packages](https://packagecloud.io/crisp-im/crisp-status-local) for Debian-based systems (Debian, Ubuntu, etc.).
 
-**Important: Crisp Status Local only provides 64 bits packages targeting Debian 10, 11 & 12 for now (codenames: `buster`, `bullseye` & `bookworm`). You will still be able to use them on other Debian versions, as well as Ubuntu.**
+**Important: Crisp Status Local only provides 64 bits packages targeting Debian 11 & 12 for now (codenames: `bullseye` & `bookworm`). You will still be able to use them on other Debian versions, as well as Ubuntu.**
 
 First, add the Crisp Status Local APT repository (eg. for Debian `bookworm`):
 
