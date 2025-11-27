@@ -11,7 +11,7 @@ Install Crisp Status Local on a server of yours and configure it with your Crisp
 
 Copyright 2018 Crisp IM SAS. See LICENSE for copying information.
 
-_Tested at Rust version: `rustc 1.62.0 (a8314ef7d 2022-06-27)`_
+_Tested at Rust version: `rustc 1.91.1 (ed61e7d7e 2025-11-07)`_
 
 * **😘 Maintainer**: [@valeriansaliou](https://github.com/valeriansaliou)
 

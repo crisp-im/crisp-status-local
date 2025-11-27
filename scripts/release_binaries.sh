@@ -38,7 +38,7 @@ fi
 function release_for_architecture {
     final_tar="v$CRISP_STATUS_LOCAL_VERSION-$1.tar.gz"
 
-    rm -rf ./crisp-status-local/ && \
+    rm -rf ./crisp-status-local/ ./target/ && \
         cross build --target "$2" --release && \
         mkdir ./crisp-status-local && \
         cp -p "target/$2/release/crisp-status-local" ./crisp-status-local/ && \
@@ -64,7 +64,7 @@ pushd "$BASE_DIR" > /dev/null
     echo "Executing release steps for Crisp Status Local v$CRISP_STATUS_LOCAL_VERSION..."
 
     release_for_architecture "x86_64" "x86_64-unknown-linux-musl" && \
-        release_for_architecture "armv7" "armv7-unknown-linux-musleabihf"
+        release_for_architecture "aarch64" "aarch64-unknown-linux-musl"
     rc=$?
 
     if [ $rc -eq 0 ]; then
