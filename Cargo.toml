@@ -1,6 +1,6 @@
 [package]
 name = "crisp-status-local"
-version = "1.4.0"
+version = "1.4.1"
 description = "Crisp Status local probe relay."
 readme = "README.md"
 license = "MPL-2.0"
