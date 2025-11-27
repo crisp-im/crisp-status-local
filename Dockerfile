@@ -17,7 +17,7 @@ RUN apt-get install -y musl-tools
 RUN rustup target add $(cat .toolchain)
 
 RUN cargo build --release --target $(cat .toolchain)
-RUN cp ./target/$(cat .toolchain)/release/crisp-status-local ./
+RUN mv ./target/$(cat .toolchain)/release/crisp-status-local ./
 
 FROM scratch
 
