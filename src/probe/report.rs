@@ -4,7 +4,8 @@
 // Copyright: 2018, Crisp IM SAS
 // License: Mozilla Public License v2.0 (MPL v2.0)
 
-use base64;
+use base64::engine::general_purpose::STANDARD as base64_encoder;
+use base64::Engine;
 use http_req::{
     request::{Method, Request},
     uri::Uri,
@@ -39,7 +40,7 @@ lazy_static! {
         format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
     pub static ref REPORT_HTTP_HEADER_AUTHORIZATION: String = format!(
         "Basic {}",
-        base64::encode(&format!(":{}", APP_CONF.report.token))
+        base64_encoder.encode(&format!(":{}", APP_CONF.report.token))
     );
 }
 
