@@ -75,6 +75,7 @@ pub struct MapServiceNodeHTTPStatus {
 #[derive(Deserialize)]
 pub struct MapServiceNodeHTTPBody {
     pub healthy_match: Option<String>,
+    pub dead_match: Option<String>,
 }
 
 #[derive(Debug)]

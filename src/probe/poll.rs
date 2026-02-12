@@ -316,17 +316,23 @@ fn proceed_replica_request_http(
     debug!("prober poll will fire for http target: {}", &url);
 
     // Unpack HTTP body match
-    let http_body_healthy_match = http.as_ref().and_then(|ref http_inner| {
+    let (mut http_body_healthy_match, mut http_body_dead_match) = (None, None);
+
+    if let Some(ref http_inner) = http {
         if let Some(ref http_inner_body_inner) = http_inner.body {
             if let Some(ref healthy_match_inner) = http_inner_body_inner.healthy_match {
                 if healthy_match_inner.is_empty() == false {
-                    return Some(healthy_match_inner.to_owned());
+                    http_body_healthy_match = Some(healthy_match_inner.to_owned());
+                }
+            }
+
+            if let Some(ref dead_match_inner) = http_inner_body_inner.dead_match {
+                if dead_match_inner.is_empty() == false {
+                    http_body_dead_match = Some(dead_match_inner.to_owned());
                 }
             }
         }
-
-        None
-    });
+    }
 
     // Unpack dead timeout
     let dead_timeout = acquire_dead_timeout(metrics);
@@ -341,11 +347,13 @@ fn proceed_replica_request_http(
         .connect_timeout(Some(dead_timeout))
         .read_timeout(Some(dead_timeout))
         .write_timeout(Some(dead_timeout))
-        .method(if http_body_healthy_match.is_some() == true {
-            Method::GET
-        } else {
-            Method::HEAD
-        })
+        .method(
+            if http_body_healthy_match.is_some() == true || http_body_dead_match.is_some() == true {
+                Method::GET
+            } else {
+                Method::HEAD
+            },
+        )
         .header("User-Agent", &*POLL_HTTP_HEADER_USERAGENT)
         .send(&mut response_body);
 
@@ -376,11 +384,29 @@ fn proceed_replica_request_http(
 
         // Consider as UP?
         if status_code >= http_healthy_above && status_code < http_healthy_below {
-            // Check response body for match? (if configured)
+            // Check response body for dead match? (if configured)
+            if let Some(ref http_body_dead_match_inner) = http_body_dead_match {
+                if !response_body.is_empty() {
+                    debug!(
+                        "checking prober poll result response text for url: {} for dead match",
+                        &url
+                    );
+
+                    // Matches? Consider as DOWN.
+                    let text_search = TwoWaySearcher::new(http_body_dead_match_inner.as_bytes())
+                        .search_in(&response_body);
+
+                    if text_search.is_some() {
+                        return (false, None);
+                    }
+                }
+            }
+
+            // Check response body for healthy match? (if configured)
             if let Some(ref http_body_healthy_match_inner) = http_body_healthy_match {
                 if !response_body.is_empty() {
                     debug!(
-                        "checking prober poll result response text for url: {} for any match",
+                        "checking prober poll result response text for url: {} for healthy match",
                         &url
                     );
 
